@@ -2,7 +2,7 @@
 main.py – Orchestrates the full daily-brief pipeline:
   1. Fetch news from RSS sources
   2. Score and rank articles by importance
-  3. Apply quota-based category selection (select.py)
+  3. Apply quota-based category selection (selector.py)
   4. Translate titles and generate bilingual summaries
   5. Render HTML + Markdown report (grouped by category)
   6. Send email to subscribers

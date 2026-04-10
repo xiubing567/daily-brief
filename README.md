@@ -206,7 +206,7 @@ A: 在 `config/sources.yml` 对应条目中添加 `enabled: false`。
 A: 确认已开启 Gmail 两步验证并使用"应用专用密码"，而非账号密码。
 
 **Q: 如何调整类目配额？**
-A: 编辑 `scripts/select.py` 中的 `CORE_QUOTA`、`OTHER_QUOTA`、`DEFAULT_TOTAL` 常量。
+A: 编辑 `scripts/selector.py` 中的 `CORE_QUOTA`、`OTHER_QUOTA`、`DEFAULT_TOTAL` 常量。
 
 **Q: 如何启用 X/Twitter 来源？**
 A: 在 `config/sources.yml` 中找到 X 相关条目，将 `enabled: false` 改为 `enabled: true`，并确保 URL 指向一个可用的 Nitter RSS 代理实例。

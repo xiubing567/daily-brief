@@ -1,5 +1,5 @@
 """
-select.py – Quota-based article selection strategy.
+selector.py – Quota-based article selection strategy.
 
 Instead of a simple global Top-N (which lets one hot category dominate),
 this module implements per-category quotas so every important category
