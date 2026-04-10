@@ -1,224 +1,355 @@
 # Daily Brief – News Sources Configuration
-# Each source has: name, url (RSS feed), category, weight (1-10)
-# Higher weight = higher importance in scoring
+# Each source has:
+#   name     – display name
+#   url      – RSS feed URL
+#   category – article category (see render_report.py CATEGORY_ZH for full list)
+#   weight   – source importance 1-10 (higher = more likely to appear)
+#   type     – source type: news | blog | forum | video | paper
+#              Used for "news-first" prioritisation in rank.py:
+#              news(10) > forum(8) > video(7) > blog(6) > paper(5)
+#   enabled  – set to false to temporarily disable a source (default: true)
 
 sources:
-  # ── AI & Machine Learning ──────────────────────────────────────────
+  # ── AI & Machine Learning – News / Blogs ──────────────────────────
   - name: "OpenAI Blog"
     url: "https://openai.com/blog/rss/"
     category: "AI"
     weight: 10
+    type: "blog"
 
   - name: "DeepMind Blog"
     url: "https://deepmind.google/blog/rss.xml"
     category: "AI"
     weight: 10
+    type: "blog"
 
   - name: "Google AI Blog"
     url: "https://blog.research.google/feeds/posts/default"
     category: "AI"
     weight: 9
+    type: "blog"
 
   - name: "MIT Technology Review – AI"
     url: "https://www.technologyreview.com/topic/artificial-intelligence/feed"
     category: "AI"
     weight: 9
-
-  - name: "arXiv cs.AI"
-    url: "https://rss.arxiv.org/rss/cs.AI"
-    category: "AI"
-    weight: 8
-
-  - name: "arXiv cs.LG"
-    url: "https://rss.arxiv.org/rss/cs.LG"
-    category: "AI"
-    weight: 8
+    type: "news"
 
   - name: "Hugging Face Blog"
     url: "https://huggingface.co/blog/feed.xml"
     category: "AI"
     weight: 8
+    type: "blog"
 
-  # ── Robotics ──────────────────────────────────────────────────────
+  - name: "VentureBeat – AI"
+    url: "https://venturebeat.com/category/ai/feed/"
+    category: "AI"
+    weight: 8
+    type: "news"
+
+  # ── Robotics – News ────────────────────────────────────────────────
   - name: "IEEE Spectrum – Robotics"
     url: "https://spectrum.ieee.org/feeds/topic/robotics.rss"
     category: "Robotics"
     weight: 9
+    type: "news"
 
   - name: "The Robot Report"
     url: "https://www.therobotreport.com/feed/"
     category: "Robotics"
     weight: 7
+    type: "news"
 
-  # ── General Technology ─────────────────────────────────────────────
+  # ── General Technology – News ──────────────────────────────────────
   - name: "MIT Technology Review"
     url: "https://www.technologyreview.com/feed/"
     category: "Technology"
     weight: 9
+    type: "news"
 
   - name: "Wired"
     url: "https://www.wired.com/feed/rss"
     category: "Technology"
     weight: 8
+    type: "news"
 
   - name: "Ars Technica"
     url: "https://feeds.arstechnica.com/arstechnica/index"
     category: "Technology"
     weight: 8
+    type: "news"
 
   - name: "The Verge"
     url: "https://www.theverge.com/rss/index.xml"
     category: "Technology"
     weight: 7
+    type: "news"
 
   - name: "TechCrunch"
     url: "https://techcrunch.com/feed/"
     category: "Technology"
     weight: 7
+    type: "news"
 
   - name: "IEEE Spectrum"
     url: "https://spectrum.ieee.org/feeds/feed.rss"
     category: "Technology"
     weight: 9
+    type: "news"
 
-  # ── Science (General) ──────────────────────────────────────────────
+  # ── Science (General) – News / Magazines ──────────────────────────
   - name: "Nature News"
     url: "https://www.nature.com/nature.rss"
     category: "Science"
     weight: 10
+    type: "news"
 
   - name: "Science Magazine"
     url: "https://www.science.org/rss/news_current.xml"
     category: "Science"
     weight: 10
+    type: "news"
 
   - name: "New Scientist"
     url: "https://www.newscientist.com/feed/home/"
     category: "Science"
     weight: 8
+    type: "news"
 
   - name: "Scientific American"
     url: "https://www.scientificamerican.com/platform/morgue/rss/sciam_rss.xml"
     category: "Science"
     weight: 8
+    type: "news"
 
   - name: "Science Daily"
     url: "https://www.sciencedaily.com/rss/all.xml"
     category: "Science"
     weight: 7
+    type: "news"
 
   - name: "Phys.org"
     url: "https://phys.org/rss-feed/"
     category: "Science"
     weight: 7
+    type: "news"
 
-  # ── Physics ────────────────────────────────────────────────────────
-  - name: "arXiv Physics"
-    url: "https://rss.arxiv.org/rss/physics"
-    category: "Physics"
-    weight: 8
-
+  # ── Physics – News ─────────────────────────────────────────────────
   - name: "Physical Review Letters"
     url: "https://feeds.aps.org/rss/recent/prl.xml"
     category: "Physics"
     weight: 9
+    type: "news"
 
-  # ── Biology & Life Sciences ────────────────────────────────────────
+  - name: "Physics Today"
+    url: "https://physicstoday.scitation.org/action/showFeed?type=etoc&feed=rss&jc=pto"
+    category: "Physics"
+    weight: 8
+    type: "news"
+
+  # ── Biology & Life Sciences – News ────────────────────────────────
   - name: "Nature – Biology"
     url: "https://www.nature.com/subjects/biological-sciences.rss"
     category: "Biology"
     weight: 9
+    type: "news"
 
   - name: "Cell Press"
     url: "https://www.cell.com/pb-assets/RSS/home-rss.xml"
     category: "Biology"
     weight: 9
+    type: "news"
 
-  - name: "arXiv q-bio"
-    url: "https://rss.arxiv.org/rss/q-bio"
-    category: "Biology"
-    weight: 7
-
-  # ── Medicine & Health ──────────────────────────────────────────────
+  # ── Medicine & Health – News ───────────────────────────────────────
   - name: "The Lancet"
     url: "https://www.thelancet.com/rssfeed/lancet_online.xml"
     category: "Medicine"
     weight: 10
+    type: "news"
 
   - name: "NEJM"
     url: "https://www.nejm.org/action/showFeed?jc=nejm&type=etoc&feed=rss"
     category: "Medicine"
     weight: 10
+    type: "news"
 
   - name: "WHO News"
     url: "https://www.who.int/rss-feeds/news-english.xml"
     category: "Medicine"
     weight: 9
+    type: "news"
 
-  # ── Space & Aerospace ──────────────────────────────────────────────
+  - name: "STAT News"
+    url: "https://www.statnews.com/feed/"
+    category: "Medicine"
+    weight: 8
+    type: "news"
+
+  # ── Space & Aerospace – News ───────────────────────────────────────
   - name: "NASA Breaking News"
     url: "https://www.nasa.gov/rss/dyn/breaking_news.rss"
     category: "Space"
     weight: 10
+    type: "news"
 
   - name: "ESA News"
     url: "https://www.esa.int/rssfeed/Our_Activities/Space_Science"
     category: "Space"
     weight: 9
+    type: "news"
 
   - name: "SpaceNews"
     url: "https://spacenews.com/feed/"
     category: "Space"
     weight: 8
+    type: "news"
 
   - name: "Space.com"
     url: "https://www.space.com/feeds/all"
     category: "Space"
     weight: 7
+    type: "news"
 
-  # ── Chemistry ──────────────────────────────────────────────────────
+  # ── Chemistry – News ───────────────────────────────────────────────
   - name: "Chemical & Engineering News"
     url: "https://cen.acs.org/rss/articles.xml"
     category: "Chemistry"
     weight: 8
+    type: "news"
 
   - name: "Nature Chemistry"
     url: "https://www.nature.com/nchem.rss"
     category: "Chemistry"
     weight: 9
+    type: "news"
 
-  # ── Psychology & Neuroscience ──────────────────────────────────────
+  # ── Psychology & Neuroscience – News ──────────────────────────────
   - name: "APA News"
     url: "https://www.apa.org/news/apa/rss"
     category: "Psychology"
     weight: 8
+    type: "news"
 
   - name: "Neuroscience News"
     url: "https://neurosciencenews.com/feed/"
     category: "Psychology"
     weight: 7
+    type: "news"
 
-  # ── Social Sciences ────────────────────────────────────────────────
+  # ── Social Sciences – News ─────────────────────────────────────────
   - name: "Science – Social Sciences"
     url: "https://www.science.org/rss/news_current.xml"
     category: "Social Sciences"
     weight: 7
+    type: "news"
 
-  # ── Information Engineering ────────────────────────────────────────
+  # ── Information Engineering – News ────────────────────────────────
   - name: "ACM TechNews"
     url: "https://technews.acm.org/feed.xml"
     category: "InfoEng"
     weight: 8
+    type: "news"
+
+  # ── Papers / arXiv (论文) ──────────────────────────────────────────
+  # arXiv sources are grouped as "Papers" category with lower weight to
+  # avoid dominating the brief. Increase quota in select.py if needed.
+  - name: "arXiv cs.AI"
+    url: "https://rss.arxiv.org/rss/cs.AI"
+    category: "Papers"
+    weight: 6
+    type: "paper"
+
+  - name: "arXiv cs.LG"
+    url: "https://rss.arxiv.org/rss/cs.LG"
+    category: "Papers"
+    weight: 6
+    type: "paper"
+
+  - name: "arXiv cs.RO"
+    url: "https://rss.arxiv.org/rss/cs.RO"
+    category: "Papers"
+    weight: 5
+    type: "paper"
 
   - name: "arXiv cs.SE"
     url: "https://rss.arxiv.org/rss/cs.SE"
-    category: "InfoEng"
-    weight: 7
+    category: "Papers"
+    weight: 5
+    type: "paper"
 
   - name: "arXiv cs.CR"
     url: "https://rss.arxiv.org/rss/cs.CR"
-    category: "InfoEng"
+    category: "Papers"
+    weight: 5
+    type: "paper"
+
+  - name: "arXiv Physics"
+    url: "https://rss.arxiv.org/rss/physics"
+    category: "Papers"
+    weight: 5
+    type: "paper"
+
+  - name: "arXiv q-bio"
+    url: "https://rss.arxiv.org/rss/q-bio"
+    category: "Papers"
+    weight: 5
+    type: "paper"
+
+  # ── Reddit – Community Discussion (论坛) ──────────────────────────
+  # Reddit supports .rss suffix on subreddit URLs
+  - name: "Reddit r/MachineLearning"
+    url: "https://www.reddit.com/r/MachineLearning/.rss"
+    category: "AI"
     weight: 7
+    type: "forum"
+
+  - name: "Reddit r/artificial"
+    url: "https://www.reddit.com/r/artificial/.rss"
+    category: "AI"
+    weight: 6
+    type: "forum"
+
+  - name: "Reddit r/technology"
+    url: "https://www.reddit.com/r/technology/.rss"
+    category: "Technology"
+    weight: 6
+    type: "forum"
+
+  - name: "Reddit r/science"
+    url: "https://www.reddit.com/r/science/.rss"
+    category: "Science"
+    weight: 7
+    type: "forum"
+
+  - name: "Reddit r/space"
+    url: "https://www.reddit.com/r/space/.rss"
+    category: "Space"
+    weight: 6
+    type: "forum"
+
+  - name: "Reddit r/robotics"
+    url: "https://www.reddit.com/r/robotics/.rss"
+    category: "Robotics"
+    weight: 6
+    type: "forum"
+
+  - name: "Reddit r/physics"
+    url: "https://www.reddit.com/r/physics/.rss"
+    category: "Physics"
+    weight: 6
+    type: "forum"
+
+  - name: "Reddit r/biology"
+    url: "https://www.reddit.com/r/biology/.rss"
+    category: "Biology"
+    weight: 5
+    type: "forum"
+
+  - name: "Reddit r/medicine"
+    url: "https://www.reddit.com/r/medicine/.rss"
+    category: "Medicine"
+    weight: 6
+    type: "forum"
 
   # ── YouTube Channels (public RSS) ──────────────────────────────────
   # Format: https://www.youtube.com/feeds/videos.xml?channel_id=CHANNEL_ID
@@ -226,10 +357,61 @@ sources:
     url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCbfYPyITQ-7l4upoX8nvctg"
     category: "AI"
     weight: 6
-    enabled: true
+    type: "video"
 
   - name: "Lex Fridman (YouTube)"
     url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCSHZKyawb77ixDdsGog4iWA"
     category: "AI"
     weight: 6
-    enabled: true
+    type: "video"
+
+  - name: "Kurzgesagt (YouTube)"
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCsXVk37bltHxD1rDPwtNM8Q"
+    category: "Science"
+    weight: 6
+    type: "video"
+
+  - name: "Veritasium (YouTube)"
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCHnyfMqiRRG1u-2MsSQLbXA"
+    category: "Science"
+    weight: 6
+    type: "video"
+
+  - name: "NASA Goddard (YouTube)"
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCLA_DiR1FfKNvjuUpBHmylQ"
+    category: "Space"
+    weight: 7
+    type: "video"
+
+  - name: "SpaceX (YouTube)"
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCtI0Hodo5o5dUb67FeUjAlg"
+    category: "Space"
+    weight: 6
+    type: "video"
+
+  - name: "SmarterEveryDay (YouTube)"
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC6107grRI4m0o2-emgoDnAA"
+    category: "Technology"
+    weight: 5
+    type: "video"
+
+  # ── X / Twitter (可选插件 – 默认关闭) ──────────────────────────────
+  # X (Twitter) sources are DISABLED by default due to API access limitations.
+  # To enable: set enabled: true and ensure a valid Nitter RSS proxy or
+  # official Bearer token is configured.
+  # Nitter public instances can be used as RSS proxies when available,
+  # e.g. https://nitter.net/elonmusk/rss (instance availability varies).
+  # No paid API key is required for Nitter-based RSS.
+  - name: "X – @OpenAI (via Nitter)"
+    url: "https://nitter.net/OpenAI/rss"
+    category: "AI"
+    weight: 7
+    type: "news"
+    enabled: false  # Enable if a reliable Nitter instance is available
+
+  - name: "X – @NASA (via Nitter)"
+    url: "https://nitter.net/NASA/rss"
+    category: "Space"
+    weight: 7
+    type: "news"
+    enabled: false  # Enable if a reliable Nitter instance is available

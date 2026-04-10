@@ -1,13 +1,14 @@
 """
 main.py – Orchestrates the full daily-brief pipeline:
   1. Fetch news from RSS sources
-  2. Rank articles by importance
-  3. Translate titles and generate bilingual summaries
-  4. Render HTML + Markdown report
-  5. Send email to subscribers
+  2. Score and rank articles by importance
+  3. Apply quota-based category selection (select.py)
+  4. Translate titles and generate bilingual summaries
+  5. Render HTML + Markdown report (grouped by category)
+  6. Send email to subscribers
 
 Usage:
-  python scripts/main.py [--top-n 20] [--lookback-hours 36] \
+  python scripts/main.py [--top-n 30] [--lookback-hours 36] \
                          [--config config/sources.yml] \
                          [--subscribers config/subscribers.json] \
                          [--output-dir reports] \
@@ -27,6 +28,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 from fetch_news import fetch_all
 from rank import rank
 from render_report import get_email_subject, render_html, save_reports
+from selector import select
 from send_email import load_subscribers, send
 from translate import translate_and_summarise
 
@@ -40,7 +42,7 @@ log = logging.getLogger(__name__)
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Run the daily-brief pipeline")
-    p.add_argument("--top-n", type=int, default=20, help="Number of top articles (default: 20)")
+    p.add_argument("--top-n", type=int, default=30, help="Number of top articles (default: 30)")
     p.add_argument(
         "--lookback-hours",
         type=int,
@@ -80,9 +82,16 @@ def main() -> None:
         log.warning("No articles fetched. Exiting.")
         sys.exit(0)
 
-    # ── Step 2: Rank ──────────────────────────────────────────────────
-    log.info("Step 2/5 – Ranking %d articles…", len(articles))
-    top_articles = rank(articles, top_n=args.top_n)
+    # ── Step 2: Score all articles ────────────────────────────────────
+    log.info("Step 2/5 – Scoring %d articles…", len(articles))
+    # rank() scores every article and returns global top pool (2x target)
+    # We pass a generous pool size so select() has enough candidates per category
+    pool_size = max(args.top_n * 3, 90)
+    scored_pool = rank(articles, top_n=pool_size)
+
+    # ── Step 2b: Quota-based category selection ───────────────────────
+    top_articles = select(scored_pool, total=args.top_n)
+    log.info("Selected %d articles via quota strategy", len(top_articles))
 
     # ── Step 3: Translate ─────────────────────────────────────────────
     log.info("Step 3/5 – Translating and summarising %d articles…", len(top_articles))

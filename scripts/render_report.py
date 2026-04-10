@@ -2,14 +2,16 @@
 render_report.py – Generate HTML (for email) and Markdown (for archiving) reports.
 
 Both formats follow the structure:
-  - Global top-20 list ordered by importance
-  - Each item shows: rank, category, title (EN + ZH), summary (EN + ZH), source link
+  - Articles grouped by category (section per category)
+  - Within each category, items are sorted by importance score
+  - Each item shows: global rank, category, title (EN + ZH), summary (EN + ZH), source link
 """
 
 from __future__ import annotations
 
 import logging
 import os
+from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -34,8 +36,27 @@ CATEGORY_ZH: dict[str, str] = {
     "Social Sciences": "社会科学",
     "InfoEng": "信息工程",
     "Technology": "科技",
+    "Papers": "学术论文",
     "General": "综合",
 }
+
+# Preferred display order for categories (core categories first)
+CATEGORY_ORDER: list[str] = [
+    "AI",
+    "Technology",
+    "Science",
+    "Medicine",
+    "Space",
+    "Robotics",
+    "Physics",
+    "Biology",
+    "Chemistry",
+    "Psychology",
+    "Social Sciences",
+    "InfoEng",
+    "Papers",
+    "General",
+]
 
 # ── HTML template ─────────────────────────────────────────────────────────────
 
@@ -56,14 +77,23 @@ HTML_TEMPLATE = """\
   .header h1 {{ margin:0 0 6px; font-size:1.6rem; letter-spacing:.5px; }}
   .header p  {{ margin:0; opacity:.85; font-size:.95rem; }}
   .body  {{ padding:28px 36px; }}
-  .item  {{ border-left:4px solid #3f51b5; padding:14px 16px; margin-bottom:22px;
+  .section-header {{ margin:28px 0 14px; padding:10px 14px;
+                     background:linear-gradient(90deg,#e8eaf6,#f5f7fa);
+                     border-left:5px solid #3f51b5; border-radius:0 6px 6px 0; }}
+  .section-header h2 {{ margin:0; font-size:1.1rem; color:#1a237e; }}
+  .section-header .cat-en {{ font-size:.85rem; color:#5c6bc0; font-weight:400; }}
+  .item  {{ border-left:4px solid #7986cb; padding:14px 16px; margin-bottom:18px;
             background:#f8f9ff; border-radius:0 6px 6px 0; }}
   .rank  {{ display:inline-block; background:#3f51b5; color:#fff;
             font-size:.75rem; font-weight:700; padding:2px 8px;
             border-radius:3px; margin-right:8px; }}
-  .cat   {{ display:inline-block; background:#e8eaf6; color:#3f51b5;
-            font-size:.75rem; font-weight:600; padding:2px 8px;
-            border-radius:3px; }}
+  .type-badge {{ display:inline-block; font-size:.7rem; font-weight:600;
+                 padding:2px 7px; border-radius:3px; margin-right:6px; }}
+  .type-news   {{ background:#e8f5e9; color:#2e7d32; }}
+  .type-forum  {{ background:#fff3e0; color:#e65100; }}
+  .type-video  {{ background:#fce4ec; color:#c62828; }}
+  .type-blog   {{ background:#e3f2fd; color:#1565c0; }}
+  .type-paper  {{ background:#f3e5f5; color:#6a1b9a; }}
   .title-en {{ font-size:1.05rem; font-weight:700; margin:8px 0 2px; color:#1a237e; }}
   .title-zh {{ font-size:1.0rem;  font-weight:700; margin:2px 0 8px; color:#283593; }}
   .summary  {{ font-size:.9rem; line-height:1.6; color:#444; margin-bottom:6px; }}
@@ -80,10 +110,10 @@ HTML_TEMPLATE = """\
 <div class="container">
   <div class="header">
     <h1>📰 每日科技日报 · Daily Tech Brief</h1>
-    <p>{date_beijing} · Top {count} 全球重要新闻 / Global Top Stories</p>
+    <p>{date_beijing} · 共 {count} 条全球重要新闻 / {count} Global Top Stories</p>
   </div>
   <div class="body">
-{items_html}
+{sections_html}
   </div>
   <div class="footer">
     由 <a href="https://github.com/xiubing567/daily-brief" style="color:#aaa">daily-brief</a> 自动生成 ·
@@ -95,10 +125,14 @@ HTML_TEMPLATE = """\
 </html>
 """
 
+SECTION_HTML_TEMPLATE = """\
+    <div class="section-header">
+      <h2>{cat_emoji} {cat_zh} <span class="cat-en">/ {cat_en}</span></h2>
+    </div>"""
+
 ITEM_HTML_TEMPLATE = """\
     <div class="item">
-      <span class="rank">#{rank}</span>
-      <span class="cat">{cat_zh} / {cat_en}</span>
+      <span class="rank">#{rank}</span><span class="type-badge type-{source_type}">{type_label}</span>
       <div class="title-en">{title_en}</div>
       <div class="title-zh">{title_zh}</div>
       <div class="summary summary-en">📝 {summary_en}</div>
@@ -120,19 +154,52 @@ MD_HEADER = """\
 
 """
 
+MD_SECTION_HEADER = """\
+## {cat_emoji} {cat_zh} / {cat_en}
+
+"""
+
 MD_ITEM = """\
-## #{rank} [{cat_zh}/{cat_en}] {title_en}
+### #{rank} {title_en}
 
 **{title_zh}**
 
 - 📝 **EN**: {summary_en}
 - 📝 **中文**: {summary_zh}
-- 🔗 **来源**: [{source_name}]({url})
+- 🔗 **来源 / Source**: [{source_name}]({url})
 
 ---
 
 """
 
+
+# ── Category emoji map ────────────────────────────────────────────────────────
+
+CATEGORY_EMOJI: dict[str, str] = {
+    "AI": "🤖",
+    "Technology": "💻",
+    "Science": "🔬",
+    "Medicine": "🏥",
+    "Space": "🚀",
+    "Robotics": "🦾",
+    "Physics": "⚛️",
+    "Biology": "🧬",
+    "Chemistry": "🧪",
+    "Psychology": "🧠",
+    "Social Sciences": "🌍",
+    "InfoEng": "📡",
+    "Papers": "📄",
+    "General": "📰",
+}
+
+# Source type display labels
+SOURCE_TYPE_LABELS: dict[str, str] = {
+    "news": "新闻",
+    "forum": "论坛",
+    "video": "视频",
+    "blog": "博客",
+    "paper": "论文",
+}
 
 # ── Rendering helpers ─────────────────────────────────────────────────────────
 
@@ -151,52 +218,90 @@ def _beijing_date_str() -> str:
     return now_bj.strftime("%Y年%m月%d日 %A")
 
 
+def _group_by_category(articles: list[dict]) -> dict[str, list[dict]]:
+    """Return articles grouped by category, preserving score order within each group."""
+    groups: dict[str, list[dict]] = defaultdict(list)
+    for art in articles:
+        groups[art.get("category", "General")].append(art)
+    # Sort within each group by score descending
+    for cat in groups:
+        groups[cat].sort(key=lambda a: a.get("score", 0), reverse=True)
+    return groups
+
+
+def _ordered_categories(groups: dict[str, list[dict]]) -> list[str]:
+    """Return categories in preferred display order; unknown categories appended last."""
+    ordered = [c for c in CATEGORY_ORDER if c in groups]
+    extras = [c for c in groups if c not in CATEGORY_ORDER]
+    return ordered + sorted(extras)
+
+
 def render_html(articles: list[dict]) -> str:
     date_str = _beijing_date_str()
-    items_parts = []
-    for art in articles:
-        cat_en = art.get("category", "General")
-        cat_zh = CATEGORY_ZH.get(cat_en, cat_en)
-        items_parts.append(
-            ITEM_HTML_TEMPLATE.format(
-                rank=art.get("rank", "?"),
+    groups = _group_by_category(articles)
+    cats = _ordered_categories(groups)
+
+    section_parts = []
+    for cat in cats:
+        cat_zh = CATEGORY_ZH.get(cat, cat)
+        cat_emoji = CATEGORY_EMOJI.get(cat, "📰")
+        section_parts.append(
+            SECTION_HTML_TEMPLATE.format(
+                cat_emoji=cat_emoji,
                 cat_zh=_escape_html(cat_zh),
-                cat_en=_escape_html(cat_en),
-                title_en=_escape_html(art.get("title_en", art.get("title", ""))),
-                title_zh=_escape_html(art.get("title_zh", "")),
-                summary_en=_escape_html(art.get("summary_en", "")),
-                summary_zh=_escape_html(art.get("summary_zh", "")),
-                url=art.get("url", "#"),
-                source_name=_escape_html(art.get("source_name", "")),
+                cat_en=_escape_html(cat),
             )
         )
+        for art in groups[cat]:
+            source_type = art.get("source_type", "news")
+            type_label = SOURCE_TYPE_LABELS.get(source_type, source_type)
+            section_parts.append(
+                ITEM_HTML_TEMPLATE.format(
+                    rank=art.get("rank", "?"),
+                    source_type=_escape_html(source_type),
+                    type_label=_escape_html(type_label),
+                    title_en=_escape_html(art.get("title_en", art.get("title", ""))),
+                    title_zh=_escape_html(art.get("title_zh", "")),
+                    summary_en=_escape_html(art.get("summary_en", "")),
+                    summary_zh=_escape_html(art.get("summary_zh", "")),
+                    url=art.get("url", "#"),
+                    source_name=_escape_html(art.get("source_name", "")),
+                )
+            )
 
     subject = f"每日科技日报 {datetime.now(tz=BEIJING_TZ).strftime('%Y-%m-%d')}"
     return HTML_TEMPLATE.format(
         subject=subject,
         date_beijing=date_str,
         count=len(articles),
-        items_html="\n".join(items_parts),
+        sections_html="\n".join(section_parts),
     )
 
 
 def render_markdown(articles: list[dict]) -> str:
     date_str = _beijing_date_str()
     md = MD_HEADER.format(date_beijing=date_str, count=len(articles))
-    for art in articles:
-        cat_en = art.get("category", "General")
-        cat_zh = CATEGORY_ZH.get(cat_en, cat_en)
-        md += MD_ITEM.format(
-            rank=art.get("rank", "?"),
+    groups = _group_by_category(articles)
+    cats = _ordered_categories(groups)
+
+    for cat in cats:
+        cat_zh = CATEGORY_ZH.get(cat, cat)
+        cat_emoji = CATEGORY_EMOJI.get(cat, "📰")
+        md += MD_SECTION_HEADER.format(
+            cat_emoji=cat_emoji,
             cat_zh=cat_zh,
-            cat_en=cat_en,
-            title_en=art.get("title_en", art.get("title", "")),
-            title_zh=art.get("title_zh", ""),
-            summary_en=art.get("summary_en", ""),
-            summary_zh=art.get("summary_zh", ""),
-            source_name=art.get("source_name", ""),
-            url=art.get("url", "#"),
+            cat_en=cat,
         )
+        for art in groups[cat]:
+            md += MD_ITEM.format(
+                rank=art.get("rank", "?"),
+                title_en=art.get("title_en", art.get("title", "")),
+                title_zh=art.get("title_zh", ""),
+                summary_en=art.get("summary_en", ""),
+                summary_zh=art.get("summary_zh", ""),
+                source_name=art.get("source_name", ""),
+                url=art.get("url", "#"),
+            )
     return md
 
 

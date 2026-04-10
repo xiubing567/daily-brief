@@ -4,8 +4,9 @@ rank.py – Score and rank news articles by importance.
 Scoring factors:
   1. Source weight           (from config)
   2. Category weight         (AI/Science ranked higher)
-  3. Title keyword boost     (breakthrough, discovery, etc.)
-  4. Freshness               (newer articles score higher)
+  3. Source type weight      (news > forum > video > blog > paper)
+  4. Title keyword boost     (breakthrough, discovery, etc.)
+  5. Freshness               (newer articles score higher)
 
 Returns the top-N articles sorted by score descending.
 """
@@ -19,11 +20,12 @@ from typing import Any
 
 log = logging.getLogger(__name__)
 
-# How much each factor contributes to the final score (0-100 scale)
-WEIGHT_SOURCE = 0.35
-WEIGHT_CATEGORY = 0.20
-WEIGHT_KEYWORD = 0.25
-WEIGHT_FRESHNESS = 0.20
+# How much each factor contributes to the final score (0-100 scale, must sum to 1.0)
+WEIGHT_SOURCE = 0.30
+WEIGHT_CATEGORY = 0.15
+WEIGHT_SOURCE_TYPE = 0.20
+WEIGHT_KEYWORD = 0.20
+WEIGHT_FRESHNESS = 0.15
 
 # Category importance weights (relative, 1-10)
 CATEGORY_WEIGHTS: dict[str, float] = {
@@ -39,7 +41,18 @@ CATEGORY_WEIGHTS: dict[str, float] = {
     "Social Sciences": 6,
     "InfoEng": 7,
     "Technology": 7,
+    "Papers": 5,
     "General": 5,
+}
+
+# Source type weights: news-first ordering
+# news(portal/magazine/institution) > forum(Reddit) > video(YouTube) > blog > paper(arXiv)
+SOURCE_TYPE_WEIGHTS: dict[str, float] = {
+    "news": 10,
+    "forum": 8,
+    "video": 7,
+    "blog": 6,
+    "paper": 5,
 }
 
 # Keywords that signal high-importance news
@@ -97,19 +110,23 @@ def score_article(article: dict, now: datetime) -> float:
     category = article.get("category", "General")
     cat_norm = CATEGORY_WEIGHTS.get(category, 5)
 
+    source_type = article.get("source_type", "news")
+    type_norm = SOURCE_TYPE_WEIGHTS.get(source_type, 7)
+
     kw_norm = _keyword_score(article)
     fresh_norm = _freshness_score(article.get("published_dt"), now)
 
     score = (
         WEIGHT_SOURCE * source_norm * 10
         + WEIGHT_CATEGORY * cat_norm * 10
+        + WEIGHT_SOURCE_TYPE * type_norm * 10
         + WEIGHT_KEYWORD * kw_norm * 10
         + WEIGHT_FRESHNESS * fresh_norm * 10
     )
     return round(score, 2)
 
 
-def rank(articles: list[dict], top_n: int = 20) -> list[dict]:
+def rank(articles: list[dict], top_n: int = 30) -> list[dict]:
     """
     Score each article, sort by score descending, return top_n.
     Also attaches 'score' and 'rank' fields to each article.

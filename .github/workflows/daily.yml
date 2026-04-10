@@ -18,7 +18,7 @@ on:
       top_n:
         description: "Number of top articles to include"
         required: false
-        default: "20"
+        default: "30"
 
 jobs:
   generate-and-send:
@@ -48,7 +48,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}   # optional – enables better translation
         run: |
           DRY_RUN="${{ github.event.inputs.dry_run || 'false' }}"
-          TOP_N="${{ github.event.inputs.top_n || '20' }}"
+          TOP_N="${{ github.event.inputs.top_n || '30' }}"
 
           EXTRA_FLAGS=""
           if [ "$DRY_RUN" = "true" ]; then

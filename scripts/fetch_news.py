@@ -95,6 +95,7 @@ def _fetch_feed(source: dict) -> list[dict]:
     name = source["name"]
     category = source.get("category", "General")
     weight = source.get("weight", 5)
+    source_type = source.get("type", "news")
 
     try:
         # feedparser can handle the request itself, but we supply headers
@@ -134,6 +135,7 @@ def _fetch_feed(source: dict) -> list[dict]:
                 "source_name": name,
                 "category": category,
                 "source_weight": weight,
+                "source_type": source_type,
             }
         )
 
