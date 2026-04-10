@@ -1,0 +1,235 @@
+# Daily Brief – News Sources Configuration
+# Each source has: name, url (RSS feed), category, weight (1-10)
+# Higher weight = higher importance in scoring
+
+sources:
+  # ── AI & Machine Learning ──────────────────────────────────────────
+  - name: "OpenAI Blog"
+    url: "https://openai.com/blog/rss/"
+    category: "AI"
+    weight: 10
+
+  - name: "DeepMind Blog"
+    url: "https://deepmind.google/blog/rss.xml"
+    category: "AI"
+    weight: 10
+
+  - name: "Google AI Blog"
+    url: "https://blog.research.google/feeds/posts/default"
+    category: "AI"
+    weight: 9
+
+  - name: "MIT Technology Review – AI"
+    url: "https://www.technologyreview.com/topic/artificial-intelligence/feed"
+    category: "AI"
+    weight: 9
+
+  - name: "arXiv cs.AI"
+    url: "https://rss.arxiv.org/rss/cs.AI"
+    category: "AI"
+    weight: 8
+
+  - name: "arXiv cs.LG"
+    url: "https://rss.arxiv.org/rss/cs.LG"
+    category: "AI"
+    weight: 8
+
+  - name: "Hugging Face Blog"
+    url: "https://huggingface.co/blog/feed.xml"
+    category: "AI"
+    weight: 8
+
+  # ── Robotics ──────────────────────────────────────────────────────
+  - name: "IEEE Spectrum – Robotics"
+    url: "https://spectrum.ieee.org/feeds/topic/robotics.rss"
+    category: "Robotics"
+    weight: 9
+
+  - name: "The Robot Report"
+    url: "https://www.therobotreport.com/feed/"
+    category: "Robotics"
+    weight: 7
+
+  # ── General Technology ─────────────────────────────────────────────
+  - name: "MIT Technology Review"
+    url: "https://www.technologyreview.com/feed/"
+    category: "Technology"
+    weight: 9
+
+  - name: "Wired"
+    url: "https://www.wired.com/feed/rss"
+    category: "Technology"
+    weight: 8
+
+  - name: "Ars Technica"
+    url: "https://feeds.arstechnica.com/arstechnica/index"
+    category: "Technology"
+    weight: 8
+
+  - name: "The Verge"
+    url: "https://www.theverge.com/rss/index.xml"
+    category: "Technology"
+    weight: 7
+
+  - name: "TechCrunch"
+    url: "https://techcrunch.com/feed/"
+    category: "Technology"
+    weight: 7
+
+  - name: "IEEE Spectrum"
+    url: "https://spectrum.ieee.org/feeds/feed.rss"
+    category: "Technology"
+    weight: 9
+
+  # ── Science (General) ──────────────────────────────────────────────
+  - name: "Nature News"
+    url: "https://www.nature.com/nature.rss"
+    category: "Science"
+    weight: 10
+
+  - name: "Science Magazine"
+    url: "https://www.science.org/rss/news_current.xml"
+    category: "Science"
+    weight: 10
+
+  - name: "New Scientist"
+    url: "https://www.newscientist.com/feed/home/"
+    category: "Science"
+    weight: 8
+
+  - name: "Scientific American"
+    url: "https://www.scientificamerican.com/platform/morgue/rss/sciam_rss.xml"
+    category: "Science"
+    weight: 8
+
+  - name: "Science Daily"
+    url: "https://www.sciencedaily.com/rss/all.xml"
+    category: "Science"
+    weight: 7
+
+  - name: "Phys.org"
+    url: "https://phys.org/rss-feed/"
+    category: "Science"
+    weight: 7
+
+  # ── Physics ────────────────────────────────────────────────────────
+  - name: "arXiv Physics"
+    url: "https://rss.arxiv.org/rss/physics"
+    category: "Physics"
+    weight: 8
+
+  - name: "Physical Review Letters"
+    url: "https://feeds.aps.org/rss/recent/prl.xml"
+    category: "Physics"
+    weight: 9
+
+  # ── Biology & Life Sciences ────────────────────────────────────────
+  - name: "Nature – Biology"
+    url: "https://www.nature.com/subjects/biological-sciences.rss"
+    category: "Biology"
+    weight: 9
+
+  - name: "Cell Press"
+    url: "https://www.cell.com/pb-assets/RSS/home-rss.xml"
+    category: "Biology"
+    weight: 9
+
+  - name: "arXiv q-bio"
+    url: "https://rss.arxiv.org/rss/q-bio"
+    category: "Biology"
+    weight: 7
+
+  # ── Medicine & Health ──────────────────────────────────────────────
+  - name: "The Lancet"
+    url: "https://www.thelancet.com/rssfeed/lancet_online.xml"
+    category: "Medicine"
+    weight: 10
+
+  - name: "NEJM"
+    url: "https://www.nejm.org/action/showFeed?jc=nejm&type=etoc&feed=rss"
+    category: "Medicine"
+    weight: 10
+
+  - name: "WHO News"
+    url: "https://www.who.int/rss-feeds/news-english.xml"
+    category: "Medicine"
+    weight: 9
+
+  # ── Space & Aerospace ──────────────────────────────────────────────
+  - name: "NASA Breaking News"
+    url: "https://www.nasa.gov/rss/dyn/breaking_news.rss"
+    category: "Space"
+    weight: 10
+
+  - name: "ESA News"
+    url: "https://www.esa.int/rssfeed/Our_Activities/Space_Science"
+    category: "Space"
+    weight: 9
+
+  - name: "SpaceNews"
+    url: "https://spacenews.com/feed/"
+    category: "Space"
+    weight: 8
+
+  - name: "Space.com"
+    url: "https://www.space.com/feeds/all"
+    category: "Space"
+    weight: 7
+
+  # ── Chemistry ──────────────────────────────────────────────────────
+  - name: "Chemical & Engineering News"
+    url: "https://cen.acs.org/rss/articles.xml"
+    category: "Chemistry"
+    weight: 8
+
+  - name: "Nature Chemistry"
+    url: "https://www.nature.com/nchem.rss"
+    category: "Chemistry"
+    weight: 9
+
+  # ── Psychology & Neuroscience ──────────────────────────────────────
+  - name: "APA News"
+    url: "https://www.apa.org/news/apa/rss"
+    category: "Psychology"
+    weight: 8
+
+  - name: "Neuroscience News"
+    url: "https://neurosciencenews.com/feed/"
+    category: "Psychology"
+    weight: 7
+
+  # ── Social Sciences ────────────────────────────────────────────────
+  - name: "Science – Social Sciences"
+    url: "https://www.science.org/rss/news_current.xml"
+    category: "Social Sciences"
+    weight: 7
+
+  # ── Information Engineering ────────────────────────────────────────
+  - name: "ACM TechNews"
+    url: "https://technews.acm.org/feed.xml"
+    category: "InfoEng"
+    weight: 8
+
+  - name: "arXiv cs.SE"
+    url: "https://rss.arxiv.org/rss/cs.SE"
+    category: "InfoEng"
+    weight: 7
+
+  - name: "arXiv cs.CR"
+    url: "https://rss.arxiv.org/rss/cs.CR"
+    category: "InfoEng"
+    weight: 7
+
+  # ── YouTube Channels (public RSS) ──────────────────────────────────
+  # Format: https://www.youtube.com/feeds/videos.xml?channel_id=CHANNEL_ID
+  - name: "Two Minute Papers (YouTube)"
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCbfYPyITQ-7l4upoX8nvctg"
+    category: "AI"
+    weight: 6
+    enabled: true
+
+  - name: "Lex Fridman (YouTube)"
+    url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCSHZKyawb77ixDdsGog4iWA"
+    category: "AI"
+    weight: 6
+    enabled: true
