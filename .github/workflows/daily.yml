@@ -1,0 +1,70 @@
+name: Daily Tech Brief
+
+on:
+  # Beijing time 09:00 = UTC 01:00
+  schedule:
+    - cron: "0 1 * * *"
+  # Allow manual trigger from the Actions tab
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (generate reports but skip email)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+      top_n:
+        description: "Number of top articles to include"
+        required: false
+        default: "20"
+
+jobs:
+  generate-and-send:
+    name: Generate & Send Daily Brief
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run daily-brief pipeline
+        env:
+          GMAIL_USERNAME: ${{ secrets.GMAIL_USERNAME }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}   # optional – enables better translation
+        run: |
+          DRY_RUN="${{ github.event.inputs.dry_run || 'false' }}"
+          TOP_N="${{ github.event.inputs.top_n || '20' }}"
+
+          EXTRA_FLAGS=""
+          if [ "$DRY_RUN" = "true" ]; then
+            EXTRA_FLAGS="--dry-run"
+          fi
+
+          python scripts/main.py \
+            --top-n "$TOP_N" \
+            --lookback-hours 36 \
+            --config config/sources.yml \
+            --subscribers config/subscribers.json \
+            --output-dir reports \
+            $EXTRA_FLAGS
+
+      - name: Upload reports as artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-brief-${{ github.run_id }}
+          path: reports/
+          retention-days: 30
