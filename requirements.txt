@@ -5,6 +5,5 @@ lxml==5.2.1
 python-dateutil==2.9.0
 pytz==2024.1
 PyYAML==6.0.1
-Jinja2==3.1.4
 deep-translator==1.11.4
 openai==1.30.1

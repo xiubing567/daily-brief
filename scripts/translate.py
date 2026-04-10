@@ -57,6 +57,7 @@ def _google_translate_batch(texts: list[str], delay: float = 0.5) -> list[str]:
                 results.append("")
                 continue
             try:
+                # Truncate to 4999 chars – Google Translate API limit per request
                 translated = translator.translate(text[:4999])
                 results.append(translated or text)
             except Exception as exc:

@@ -85,10 +85,11 @@ def send(
         server.login(sender, app_password)
         for recipient in subscribers:
             try:
-                # Rebuild To header each time
-                msg.replace_header("To", recipient) if "To" in msg else msg.__setitem__(
-                    "To", recipient
-                )
+                # Rebuild To header each time so each recipient doesn't see others' addresses
+                if "To" in msg:
+                    msg.replace_header("To", recipient)
+                else:
+                    msg["To"] = recipient
                 server.sendmail(sender, recipient, msg.as_string())
                 log.info("  ✓ Sent to %s", recipient)
             except Exception as exc:

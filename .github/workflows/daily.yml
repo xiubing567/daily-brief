@@ -25,6 +25,8 @@ jobs:
     name: Generate & Send Daily Brief
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository

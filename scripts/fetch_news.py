@@ -58,9 +58,9 @@ def _canonical_url(url: str) -> str:
 
 
 def _title_hash(title: str) -> str:
-    """Short hash of a normalised title for similarity-based dedup."""
+    """Short hash of a normalised title for similarity-based dedup (non-cryptographic use)."""
     normalised = " ".join(title.lower().split())
-    return hashlib.md5(normalised.encode()).hexdigest()
+    return hashlib.md5(normalised.encode()).hexdigest()  # noqa: S324 – dedup only, not security
 
 
 def _parse_date(entry: Any) -> datetime | None:
