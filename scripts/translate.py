@@ -23,6 +23,10 @@ import time
 
 log = logging.getLogger(__name__)
 
+DEEPSEEK_BASE_URL = "https://api.deepseek.com"
+DEEPSEEK_DEFAULT_MODEL = "deepseek-v4-flash"
+OPENAI_DEFAULT_MODEL = "gpt-4o-mini"
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 
@@ -74,10 +78,22 @@ def _google_translate_batch(texts: list[str], delay: float = 0.5) -> list[str]:
 
 
 def _openai_translate_and_summarise(articles: list[dict]) -> list[dict]:
-    """Use OpenAI GPT to translate titles and generate bilingual summaries."""
+    """Use an OpenAI-compatible chat API to translate titles and generate summaries."""
     import openai
 
-    client = openai.OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+    if os.environ.get("DEEPSEEK_API_KEY", "").strip():
+        api_key = os.environ["DEEPSEEK_API_KEY"]
+        base_url = os.environ.get("DEEPSEEK_BASE_URL", DEEPSEEK_BASE_URL)
+        model = os.environ.get("DEEPSEEK_MODEL", DEEPSEEK_DEFAULT_MODEL)
+    else:
+        api_key = os.environ["OPENAI_API_KEY"]
+        base_url = os.environ.get("OPENAI_BASE_URL", "").strip() or None
+        model = os.environ.get("OPENAI_MODEL", OPENAI_DEFAULT_MODEL)
+
+    client_kwargs = {"api_key": api_key}
+    if base_url:
+        client_kwargs["base_url"] = base_url
+    client = openai.OpenAI(**client_kwargs)
 
     for art in articles:
         title_en = art.get("title", "")
@@ -96,7 +112,7 @@ def _openai_translate_and_summarise(articles: list[dict]) -> list[dict]:
 
         try:
             resp = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model=model,
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.3,
                 max_tokens=400,
@@ -158,14 +174,18 @@ def _fallback_translate_and_summarise(articles: list[dict]) -> list[dict]:
 def translate_and_summarise(articles: list[dict]) -> list[dict]:
     """
     Enrich each article with title_en, title_zh, summary_en, summary_zh.
-    Uses OpenAI if OPENAI_API_KEY is set; otherwise uses deep-translator.
+    Uses DeepSeek/OpenAI if an API key is set; otherwise uses deep-translator.
     """
     if not articles:
         return articles
 
-    use_openai = bool(os.environ.get("OPENAI_API_KEY", "").strip())
-    if use_openai:
-        log.info("Using OpenAI for translation/summarisation (%d articles)…", len(articles))
+    use_api = bool(
+        os.environ.get("DEEPSEEK_API_KEY", "").strip()
+        or os.environ.get("OPENAI_API_KEY", "").strip()
+    )
+    if use_api:
+        provider = "DeepSeek" if os.environ.get("DEEPSEEK_API_KEY", "").strip() else "OpenAI"
+        log.info("Using %s for translation/summarisation (%d articles)…", provider, len(articles))
         articles = _openai_translate_and_summarise(articles)
     else:
         log.info(

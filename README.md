@@ -35,6 +35,8 @@ pip install -r requirements.txt
 # 2. (可选) 设置环境变量 / (Optional) Set env vars
 export GMAIL_USERNAME="you@gmail.com"
 export GMAIL_APP_PASSWORD="xxxx xxxx xxxx xxxx"
+export SUBSCRIBERS_CSV="recipient1@example.com,recipient2@example.com"
+export DEEPSEEK_API_KEY="sk-..."
 export OPENAI_API_KEY="sk-..."   # optional, enables better translation
 
 # 3. 试运行（不发邮件）/ Dry run (no email)
@@ -56,7 +58,17 @@ python scripts/main.py
 |-------------|------|
 | `GMAIL_USERNAME` | 发件人 Gmail 地址，例如 `you@gmail.com` |
 | `GMAIL_APP_PASSWORD` | Gmail [应用专用密码](https://myaccount.google.com/apppasswords)（需开启 2FA）|
-| `OPENAI_API_KEY` | （可选）OpenAI API Key，启用后使用 GPT-4o-mini 翻译和摘要，质量更高 |
+| `SUBSCRIBERS_JSON` | 收件人列表，例如 `{"subscribers":["recipient@example.com"]}`；推荐用 Secret 配置 |
+| `SUBSCRIBERS_CSV` | 可选：逗号分隔的收件人列表；如果同时配置，会优先使用 `SUBSCRIBERS_JSON` |
+| `DEEPSEEK_API_KEY` | （可选）DeepSeek API Key；配置后优先使用 DeepSeek 生成中文标题和摘要 |
+| `OPENAI_API_KEY` | （可选）OpenAI API Key；未配置 DeepSeek 时才使用 OpenAI |
+
+可选 Repository variable：
+
+| Variable 名称 | 说明 |
+|-------------|------|
+| `DEEPSEEK_MODEL` | 默认 `deepseek-v4-flash`；需要更高质量时可设为 `deepseek-v4-pro` |
+| `DEEPSEEK_BASE_URL` | 默认 `https://api.deepseek.com`，通常不用改 |
 
 > ⚠️ **不要**把密码/密钥直接写进代码或 YAML 文件！务必通过 Secrets 传入。
 
@@ -64,18 +76,26 @@ python scripts/main.py
 
 ## 👥 添加 / 移除订阅者
 
-编辑 `config/subscribers.json`：
+推荐把收件人放进 GitHub Secret `SUBSCRIBERS_JSON`，不要把真实邮箱提交到公开仓库：
 
 ```json
 {
   "subscribers": [
-    "xiubing1111@gmail.com",
+    "recipient@example.com",
     "another@example.com"
   ]
 }
 ```
 
-直接 Push 即可生效，无需修改任何脚本。
+本地调试也可以用环境变量：
+
+```bash
+export SUBSCRIBERS_CSV="recipient@example.com,another@example.com"
+```
+
+`config/subscribers.json` 仅作为本地占位文件使用；如果未配置任何订阅者，正式发信会失败，避免 Actions 显示成功但实际没有发送邮件。
+
+更新 Secret 后重新运行 workflow 即可生效，无需修改任何脚本。
 
 ---
 
@@ -160,7 +180,7 @@ daily-brief/
 │       └── daily.yml          # GitHub Actions 定时任务
 ├── config/
 │   ├── sources.yml            # RSS 源列表（来源/类目/权重/类型）
-│   └── subscribers.json       # 订阅者邮箱列表
+│   └── subscribers.json       # 本地占位订阅者列表；生产建议用 SUBSCRIBERS_JSON Secret
 ├── scripts/
 │   ├── main.py                # 主入口，串联全流程
 │   ├── fetch_news.py          # 抓取 RSS + 去重过滤
