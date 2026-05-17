@@ -12,7 +12,7 @@
 sources:
   # ── AI & Machine Learning – News / Blogs ──────────────────────────
   - name: "OpenAI Blog"
-    url: "https://openai.com/blog/rss/"
+    url: "https://openai.com/news/rss.xml"
     category: "AI"
     weight: 10
     type: "blog"
@@ -59,6 +59,7 @@ sources:
     category: "Robotics"
     weight: 7
     type: "news"
+    enabled: false
 
   # ── General Technology – News ──────────────────────────────────────
   - name: "MIT Technology Review"
@@ -121,6 +122,7 @@ sources:
     category: "Science"
     weight: 8
     type: "news"
+    enabled: false
 
   - name: "Science Daily"
     url: "https://www.sciencedaily.com/rss/all.xml"
@@ -155,7 +157,7 @@ sources:
     type: "news"
 
   - name: "Cell Press"
-    url: "https://www.cell.com/pb-assets/RSS/home-rss.xml"
+    url: "https://www.cell.com/cell/current.rss"
     category: "Biology"
     weight: 9
     type: "news"
@@ -216,6 +218,7 @@ sources:
     category: "Chemistry"
     weight: 8
     type: "news"
+    enabled: false
 
   - name: "Nature Chemistry"
     url: "https://www.nature.com/nchem.rss"
@@ -249,6 +252,7 @@ sources:
     category: "InfoEng"
     weight: 8
     type: "news"
+    enabled: false
 
   # ── Papers / arXiv (论文) ──────────────────────────────────────────
   # arXiv sources are grouped as "Papers" category with lower weight to
@@ -388,6 +392,7 @@ sources:
     category: "Space"
     weight: 6
     type: "video"
+    enabled: false
 
   - name: "SmarterEveryDay (YouTube)"
     url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC6107grRI4m0o2-emgoDnAA"

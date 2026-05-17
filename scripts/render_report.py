@@ -15,6 +15,7 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import pytz
 
@@ -213,6 +214,13 @@ def _escape_html(text: str) -> str:
     )
 
 
+def _safe_href(url: str) -> str:
+    parsed = urlparse(url.strip())
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        return "#"
+    return _escape_html(url)
+
+
 def _beijing_date_str() -> str:
     now_bj = datetime.now(tz=BEIJING_TZ)
     return now_bj.strftime("%Y年%m月%d日 %A")
@@ -264,7 +272,7 @@ def render_html(articles: list[dict]) -> str:
                     title_zh=_escape_html(art.get("title_zh", "")),
                     summary_en=_escape_html(art.get("summary_en", "")),
                     summary_zh=_escape_html(art.get("summary_zh", "")),
-                    url=art.get("url", "#"),
+                    url=_safe_href(art.get("url", "#")),
                     source_name=_escape_html(art.get("source_name", "")),
                 )
             )

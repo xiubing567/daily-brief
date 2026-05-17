@@ -25,14 +25,36 @@ SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 465  # SSL
 
 
+def _normalise_subscribers(value: object) -> list[str]:
+    if isinstance(value, dict):
+        value = value.get("subscribers", [])
+    if not isinstance(value, list):
+        raise ValueError("subscriber data must be a list or an object with a subscribers list")
+
+    subscribers = []
+    seen = set()
+    for item in value:
+        email = str(item).strip()
+        if email and email not in seen:
+            subscribers.append(email)
+            seen.add(email)
+    return subscribers
+
+
 def load_subscribers(path: str = "config/subscribers.json") -> list[str]:
     """Return list of subscriber email addresses."""
+    subscribers_json = os.environ.get("SUBSCRIBERS_JSON", "").strip()
+    if subscribers_json:
+        return _normalise_subscribers(json.loads(subscribers_json))
+
+    subscribers_csv = os.environ.get("SUBSCRIBERS_CSV", "").strip()
+    if subscribers_csv:
+        return _normalise_subscribers(subscribers_csv.split(","))
+
     try:
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
-        subscribers = data.get("subscribers", [])
-        # Support plain list or list of strings
-        return [str(s).strip() for s in subscribers if s]
+        return _normalise_subscribers(data)
     except FileNotFoundError:
         log.warning("Subscribers file not found at %s; defaulting to empty list", path)
         return []
@@ -68,8 +90,10 @@ def send(
         subscribers = load_subscribers(subscribers_path)
 
     if not subscribers:
-        log.warning("No subscribers found; skipping email send.")
-        return
+        raise RuntimeError(
+            "No email subscribers configured. Set SUBSCRIBERS_JSON, SUBSCRIBERS_CSV, "
+            "or provide a non-empty subscribers file."
+        )
 
     log.info("Sending '%s' to %d subscriber(s)…", subject, len(subscribers))
 
@@ -81,6 +105,7 @@ def send(
     msg.attach(MIMEText(html_content, "html", "utf-8"))
 
     # Connect once and send to all recipients
+    failures = 0
     with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
         server.login(sender, app_password)
         for recipient in subscribers:
@@ -91,9 +116,13 @@ def send(
                 else:
                     msg["To"] = recipient
                 server.sendmail(sender, recipient, msg.as_string())
-                log.info("  ✓ Sent to %s", recipient)
+                log.info("  ✓ Sent to one subscriber")
             except Exception as exc:
-                log.error("  ✗ Failed to send to %s: %s", recipient, exc)
+                failures += 1
+                log.error("  ✗ Failed to send to one subscriber: %s", exc)
+
+    if failures:
+        raise RuntimeError(f"Failed to send daily brief to {failures} subscriber(s).")
 
     log.info("Email delivery complete.")
 
